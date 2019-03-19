@@ -1,0 +1,198 @@
+To get the information on the cluster
+kubectl cluster-info --kubeconfig /path/to/your/config.yaml
+
+To get info on nodes
+kubectl get nodes --kubeconfig /path/to/your/config.yaml
+
+NEVER SHARE your config with others!!!!
+
+IF YOU dont wanna type the config file name
+set KUBECONFIG="C:../.../bin/config.yaml"
+
+kubernetes will deploy the container for you.
+you just her that you wan 3 instances running, then she will make sure always has 3 of them
+detect one spoilt then kill it
+
+one master nodes and multiple worker/slave nodes
+digitalOcean dont allow you to see master nodes
+
+NEVER run anything on master node
+    only includes:
+        - api server
+        - scheduler
+        - controller manager
+        - database (everything created saved in here)
+
+to communicate with kubernetes, must communicate with the MASTER.
+- tools such as:
+        - kubectl
+        - user interface
+
+master communicate with kubelet,to set up container
+kube-proxy (networking part, set up ip and etc)
+
+All the communcation traffic is encrypted
+
+ingress controller(load balancer) -- either cloud <digitalOcean> or you create it yourself
+
+resources are not useful if there is any controller
+controller to read the resource file to do the actual work
+
+kubernetes you can create own resources and controller:
+    - CRD (custom resource definition)
+    - e.g. agones (custom game definition, resources understand what is a game)
+
+by default the kubernetes dont have dashboard, need to install it yourself
+    - client for java, etc to write program to provision
+
+
+command line tool for interacting with the cluster
+get the cluster information from confi file 
+    -default location 
+        $HOME /.kube/config
+        cd %USERPROFILE%
+        mkdir .kube
+        cd .kube
+        copy /path/to/config.yaml config
+    - else use the set the --kubeconfig command
+
+By default, kubernetes has 3 namespaces(OWN FIREWALL) for you
+
+All kubernetes command has this form:
+    kubectl get <resource>
+                <resource>/<name>
+    *if didnt state the name then will get from the default namespaces
+        -n <ns name>
+        e.g. kubectl get svc -n kube-system
+
+anything that is "-system", controller inside therefore dont mess with it
+
+DEFINING and USING namespace
+- create the namespace
+        kubectl create
+
+cd to the yaml file
+then:
+    kubectl apply -f file.yaml
+    kubectl get ns
+    kubectl describe ns/<yourresourcename>
+
+
+use kubectl apply easier for modification as create need to delete and create.
+kubectl appy
+*kind is what type of resource
+*metadata, generally give a name to your resource
+
+
+all containers inside one pod will communicate using LOCALHOST, 
+therefore inside one pod cannot assign two containers with the same port
+    - if one container failed, the whole pod will shut down.
+generally we have one container in one pod
+if got more than one container, one of the container behave like a sideka (gateway??)
+
+if state namespace in metadata, then when provision dont need to state which namespace
+good practice to set label
+
+POD:
+spec is tell the kubernetes what is the specification of the resources
+    - define our container <is an array>
+    inside the yaml file the tabs are very IMPORTANT
+    ### CREATE POD ### 
+        kubectl apply -f file.yaml
+        kubectl get pod/mydb-pod -n xinspace
+        kubectl describe pod/mydb-pod -n xinspace
+    ### ACCESS THE CONTAINER ###
+        kubectl exec -it mydb-pod -n xinspace bash
+        <if pod got multiple containers>
+        kubectl exec -it mydb-pod -n xinspace -c <containername> bash
+    ### DELETE POD ###
+        kubectl delete -f pod.yaml
+        OR 
+        kubectl delete pod/mydb-pod -n xinspace
+    ### VIEW LOGS ###
+        C:\Users\User\Desktop\docker_course\workshop02>kubectl logs mydb-pod -c myapp-container -n xinspace
+        Application started on PORT 3000 at Tue Mar 19 2019 03:40:10 GMT+0000 (Coordinated Universal Time)
+    #### FOR TESTING ###
+        kubectl port-forward pod/mydb-pod 8080:3000 -n xinspace
+
+DEPLOYMENT 
+    manages the number of instances running
+    manages upgrades
+    
+    ### CREATE DEPLOYMENT ###
+        core you dont write but any other groups u must write for the apiVersion
+        (YAML) important for the spec:
+            -replicias
+        deployment uses label to identify the pods
+        template gonna be pod metadata and spec
+    ### CREATE DEPLOYMENT ###
+        po - pod
+        rs - replicias
+        kubectl get po,rs,deploy -n xinspace
+        NAME                            READY   STATUS    RESTARTS   AGE
+        pod/db-deploy-bbd7497d9-7dl88   1/1     Running   0          81s
+        NAME                                        DESIRED   CURRENT   READY   AGE
+        replicaset.extensions/db-deploy-bbd7497d9   1         1         1       81s
+        NAME                              READY   UP-TO-DATE   AVAILABLE   AGE
+        deployment.extensions/db-deploy   1/1     1            1           81s
+    ### SCALE DEPLOYMENT <MANUAL>###
+        C:\Users\User\Desktop\docker_course\workshop02>kubectl scale --replicas=2 deploy/db-deploy -n xinspace
+        deployment.extensions/db-deploy scaled
+
+        C:\Users\User\Desktop\docker_course\workshop02>kubectl get po,rs,deploy -n xinspace
+        NAME                            READY   STATUS    RESTARTS   AGE
+        pod/db-deploy-bbd7497d9-7dl88   1/1     Running   0          7m22s
+        pod/db-deploy-bbd7497d9-jfzxj   1/1     Running   0          8s
+        NAME                                        DESIRED   CURRENT   READY   AGE
+        replicaset.extensions/db-deploy-bbd7497d9   2         2         2       7m22s
+        NAME                              READY   UP-TO-DATE   AVAILABLE   AGE
+        deployment.extensions/db-deploy   2/2     2            2           7m22s
+
+    ### DELETE DEPLOYMENT ###
+        kubectl delete -f db-deploy.yaml
+
+    CRASH BACKOFF -- BUG IN CODE
+    HOW DO YOU ACCESS APP IF THEY KEEP CHANGING THE IP ADDRESS? 
+        -scheduler will keep changing in order to optimise
+    ANS: PROVIDE A SERVICE, that provides a stable ip address
+
+    the service resource will route you to the pod.
+    one deployment comes with a service
+
+    three types of routing
+        cluster ip - available inside the cluster
+        nodeport - access from outside (ingress), need to find out the port number! 
+                    port number will alway change, multiple ip as each node has
+                    its ip
+        load balancer - (external load balancer) cloud resource (Nginx), but need to pay, come in from one ip and
+                        will route among all the nodeport
+    ### CREATE SERVICE ###
+        apiVersion: v1
+        kind: Service
+
+        metadata:
+            name: mydb-svc
+            namespace: xinspace
+            labels:
+                name: mydb-svc
+
+        spec:
+            type: NodePort
+            selector:
+                name: mydb-svc
+            ports:
+            # service port
+                - port: 3306
+                # container port
+                targetPort: 3306
+    
+    WRITE ALL in one yaml, end with ---
+
+    for app to look for this guy
+        <servicename>.<namespace>.svc.cluster.local
+
+TO SEE LOGS
+    kubectl logs heapster-855fc65cd7-2bvxt -f -n kube-system
+
+CHECK OUT:
+https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/

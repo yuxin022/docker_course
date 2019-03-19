@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: app-deploy
+  namespace: xinspace
+  labels:
+    name: app-deploy
+
+spec:
+  # number of instances
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      # is the label name
+      name: myapp-pod
+  template:
+    # the pod that i am going to deploy
+    metadata:
+      name: myapp-pod
+      namespace: xinspace
+      labels:
+        name: myapp-pod
+
+    spec:
+      containers:
+        - name: myapp-container
+          image: stackupiss/northwind-app:v1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+          env:
+            - name: DB_HOST
+              value: mydb-svc.xinspace.svc.cluster.local
+            - name: INSTANCE_IP_ADDRESS
+              valueFrom: 
+                fieldRef:
+                  fieldPath: status.hostIP
+          resources:
+          # set the minimum
+            requests:
+              cpu: "100m"
+
+---
+
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: myapp-svc
+  namespace: xinspace
+  labels:
+    name: myapp-svc
+
+spec:
+  type: LoadBalancer
+  selector:
+    name: myapp-pod
+  ports:
+    # service port
+    - port: 80
+      # container port
+      targetPort: 3000

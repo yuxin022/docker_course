@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+
+metadata:
+  name: mydb-pod
+  namespace: xinspace
+  labels:
+    name: mydb-pod
+
+spec:
+  containers:
+    - name: mydb-container
+      image: stackupiss/northwind-db:v1
+      imagePullPolicy:  IfNotPresent
+      ports:
+        - containerPort: 3306
+      
+      

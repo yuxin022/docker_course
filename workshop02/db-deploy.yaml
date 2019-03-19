@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: db-deploy
+  namespace: xinspace
+  labels:
+    name: db-deploy
+
+spec:
+  # number of instances
+  replicas: 1
+  selector:
+    matchLabels:
+      # is the label name
+      name: mydb-pod
+  template:
+    # the pod that i am going to deploy
+    metadata:
+      name: mydb-pod
+      namespace: xinspace
+      labels:
+        name: mydb-pod
+        # if you have one or more database, indicate this to allow identification
+        db: mysql
+
+    spec:
+      containers:
+        - name: mydb-container
+          image: stackupiss/northwind-db:v1
+          imagePullPolicy:  IfNotPresent
+          ports:
+            - containerPort: 3306
+
+---
+
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: mydb-svc
+  namespace: xinspace
+  labels:
+    name: mydb-svc
+
+spec:
+  type: ClusterIP
+  selector:
+    name: mydb-pod
+  ports:
+    # service port
+    - port: 3306
+      # container port
+      targetPort: 3306
