@@ -1,0 +1,26 @@
+# create namespace
+    kubectl apply -f namespace.yaml
+    kubectl get ns
+
+# deploy mydb-pod
+    kubectl apply -f db-deploy.yaml
+    kubectl get po,rs,deploy -n xinspace
+
+# deploy myapp-pod
+    kubectl apply -f app-deploy.yaml
+    kubectl get svc -n xinspace
+
+# deploy mydb-svc and myapp-svc
+    kubectl apply -f webui-sa.yaml
+    kubectl describe sa/webui-admin -n xinspace
+    kubectl describe secret/webui-admin-token-6mtqz -n xinspace
+
+# upgrade myapp-pod
+    kubectl scale --replicas=2 deploy/app-deploy -n xinspace
+    kubectl apply -f app-scaler.yaml
+    kubectl get svc,hpa -n xinspace
+    kubectl apply -f app-deploy.yaml --record
+    kubectl get po,svc,hpa -n xinspace
+    kubectl apply -f appv2-deploy.yaml --record
+    kubectl rollout history deploy/app-deploy -n xinspace
+    kubectl rollout undo deploy/app-deploy -n xinspace --to-revision=2
