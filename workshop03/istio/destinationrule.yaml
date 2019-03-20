@@ -1,0 +1,16 @@
+kind: DestinationRule
+metadata:
+  name: demopythonappdr1
+  namespace: default
+spec:
+  host: demopythonsvc
+  subsets:
+    - labels:
+        version: v1
+        name: version-1
+    - labels:
+        version: v2
+        name: version-2
+    - labels:
+        version: v3
+        name: version-3

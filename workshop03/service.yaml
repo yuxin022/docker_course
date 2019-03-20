@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: demopythonappsvc
+spec:
+  selector:
+    app: demopythonappdb
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 80
+    targetPort: 6000

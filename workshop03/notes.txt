@@ -1,0 +1,62 @@
+microservice communication
+    - if you wan encryption, you need some tools to do.
+SIDECAR (envoy)
+    - tracing, capture several metrics
+    - capture logs and what is the data flow and status
+    - can also become a client side load balancer
+    - manual injection(can choose metrics), auto injection
+#### Istio ####
+    TRAFFIC MANAGEMENT
+        smart routing, timely routing
+        apply the rules on the fly
+    OBSERVABILITY
+        provide logs and tag each and every request(unique id to each request)
+        keep track of the request, get the flow
+    SECURITY
+
+    install on Kubernetes -- easy as creating a new resources 
+        (type route and will get the autocomplete, kind:VirtualService)
+        but Kubernetes dont understand VirtualService.
+            need a custom resource definition, to get new type:VirtualService
+            EXTENSION!!!
+        ingress, entry point to your cluster
+        egress, exit point for your cluster to reach the internet
+
+### VIRTUAL SERVICE ###
+virtual service bind together with the gateway
+the virtualservice will route based on the url, and if there'ssubset,
+it will look at the destination rule.
+GATEWAY--> is just an entry point, u need virtual service and 
+destination file to route to any pod
+in virtual service yaml, ideally should should a default behaviour. also for behaviour if uri "/"
+
+all talkin to aload balancer, and then load balancer pass to 
+ a virtual service that will do the routing to the desired pod version
+ example, you got a new service but you dont wantto removethe previous version, 
+ so sent 80% traffic to version 1 and 20% to version 0 
+
+MANUAL injection for sidecar
+    istioctl kube-inject-f deployment.yaml > deployment-sidecar.yaml
+PILOT
+    - configure data apply across to all the side car
+    - all side car controlled by PILOT
+    - external interface to the kubernetes system
+
+
+Docker [done]
+Kubernetes [x] -- help setting up containers and assure availability, use it scale airflow and nifi
+Istio [x] -- helps to manage the routing, also keep logs and etc --- good for security aspect for the project
+            CONS -- requires alot of resources and containers, if dont have sufficient then it will failed.
+
+HOW TO DEBUG
+    1. check your istio installtion
+        istio version
+        kubectl get pods -n istio-system
+    2. Check your logs of pods themself,,, to see if they receive any traffic
+    3. check the service (ks8)
+    4. check your pod is running under ur deployment
+    5. check the gateway & its hosts , ports
+    6. check the route rule (Virtual service, see if they have gateway bound to it) , check its hosts..
+        go to route rules
+        Destination rule
+    7. if everything no problem, then delete the whole cluster and restart

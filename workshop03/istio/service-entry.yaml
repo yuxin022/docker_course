@@ -1,0 +1,12 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: hackernews-svc-entry
+  namespave: default
+spec:
+  hosts:
+    -
+  ports:
+    - number: 80
+      protocol: http
+      name: http

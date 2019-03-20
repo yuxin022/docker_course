@@ -88,7 +88,7 @@ all containers inside one pod will communicate using LOCALHOST,
 therefore inside one pod cannot assign two containers with the same port
     - if one container failed, the whole pod will shut down.
 generally we have one container in one pod
-if got more than one container, one of the container behave like a sideka (gateway??)
+if got more than one container, one of the container behave like a sidecar (gateway/proxy??)
 
 if state namespace in metadata, then when provision dont need to state which namespace
 good practice to set label

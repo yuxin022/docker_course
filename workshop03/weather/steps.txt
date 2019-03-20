@@ -1,0 +1,11 @@
+# deploy weather service
+kubectl apply -f deployment.yaml
+kubectl apply -f service.yaml
+
+# set ingress gateway
+kubectl get svc -n istio-system
+kubectl apply -f gateway.yaml
+kubectl apply -f virtualservice.yaml
+
+# set egress gateway
+kubectl apply -f service-entry.yaml

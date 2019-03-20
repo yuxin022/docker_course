@@ -1,0 +1,21 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: weatherapp-vs
+  namespace: default
+
+spec:
+  hosts:
+  - "weather.157.230.73.109.nip.io"
+  gateways:
+  - weather-ingress
+  http:
+  - match:
+    - uri:
+        exact: /
+    route:
+    - destination:
+        host: weatherappsvc
+  - route:
+    - destination:
+        host: weatherappsvc
