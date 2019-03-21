@@ -1,0 +1,33 @@
+HELM
+    package manager for kubernetes (like npm)
+    charts is just a package
+    provide a great reproducability (like docker)
+    to deploy (i.e. called release in helm)
+        helm install <myhelloworld_directory>
+        helm rollback <release_name> #roll back to previous version if something's wrong
+        * watch out for failed release, as if something went wrong while 
+            releasing it will still be released
+    
+    helm install <repo_name> --name warehouse #release name
+    helm delete --purge warehouse # to fully clean up
+    * remember to change the version value in charts.yaml file
+    * their readme.md is called NOTES.txt 
+    dont wanna deploy just want to see what it generate
+        helm install ../my-chart --dry-run --debug
+
+    ### TO INSTALL HELM ###
+        download helm from https://github.com/helm/helm/releases
+        put the exe in path
+        kubectl config get-contexts
+        kubectl -n kube-system create serviceaccount tiller
+        kubectl create clusterrolebinding tiller  --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+        helm init --service-account tiller
+        kubectl get pods -n kube-system
+    ### HELM CHECK OUT RELEASE ###
+        helm ls
+        helm repo update
+
+change the deployment once and reuse it!!! via the values.yaml
+
+some need the auto injection for istio
+https://istio.io/docs/setup/kubernetes/additional-setup/sidecar-injection/

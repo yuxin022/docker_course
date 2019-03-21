@@ -1,0 +1,17 @@
+helm create weatherapp
+helm install weatherapp/ --name v1
+helm upgrade v1 weatherapp
+
+# to deploy weatherapp
+helm install weatherapp --name=v2 --dry-run --debug
+helm install weatherapp/ --name=v2
+
+# to deploy weatherapp with ingress
+kubectl apply -f namespace.yaml
+kubectl label ns xinspace istio-injection=enabled
+kubectl get svc -n istio-system
+helm install weatherapp --name=jp
+helm install weatherapp --name=sg --set APP_DEFAULT_CITY=Singapore --set gatewayhostname=sg.157.230.73.124.nip.io
+
+# to package
+    helm package weatherapp
